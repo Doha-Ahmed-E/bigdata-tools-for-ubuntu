@@ -2,39 +2,43 @@
 
 A practical, step-by-step guide for installing, configuring, testing, and troubleshooting a local Big Data learning environment on Ubuntu.
 
-The guide covers the Hadoop ecosystem, distributed processing, NoSQL databases, data ingestion, event streaming, and the ELK stack.
+The guide covers the Hadoop ecosystem, distributed processing, NoSQL databases, data ingestion, event streaming, relational databases, and the ELK stack.
 
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Environment](#environment)
-- [Tools](#tools)
-- [Installation Order](#installation-order)
-- [Directory Layout](#directory-layout)
-- [Architecture](#architecture)
-- [Important Notes](#important-notes)
-- [Verification](#verification)
-- [Troubleshooting](#troubleshooting)
+* [Overview](#overview)
+* [Environment](#environment)
+* [Tools](#tools)
+* [Installation Order](#installation-order)
+* [Directory Layout](#directory-layout)
+* [Architecture](#architecture)
+* [Important Notes](#important-notes)
+* [Scripts](#scripts)
+* [Verification](#verification)
+* [Troubleshooting](#troubleshooting)
+* [Contributing](#contributing)
+* [License](#license)
 
 ---
 
 ## Overview
 
-This repository documents the setup of a local Big Data development and learning environment.
+This repository documents the setup of a local Big Data development and learning environment on Ubuntu.
 
-The goal is to provide reproducible installation instructions rather than relying on pre-configured virtual machines or Docker images.
+The goal is to provide reproducible, step-by-step installation instructions rather than relying on pre-configured virtual machines or Docker images.
 
 The setup is intended for:
 
-- Big Data coursework
-- Hadoop ecosystem labs
-- Data engineering practice
-- Distributed processing experiments
-- NoSQL database practice
-- Streaming and messaging practice
-- ELK stack experimentation
+* Big Data coursework
+* Hadoop ecosystem labs
+* Data engineering practice
+* Distributed processing experiments
+* NoSQL database practice
+* Data ingestion
+* Streaming and messaging practice
+* ELK stack experimentation
 
 This is a **single-machine learning environment**, not a production cluster.
 
@@ -75,12 +79,14 @@ the paths in the configuration files should be adjusted accordingly.
 | Flink         |         1.20.2 | Stream and batch processing                 |
 | Flume         |         1.11.0 | Data ingestion                              |
 | HBase         | 2.5.12-hadoop3 | Distributed NoSQL database                  |
-| Sqoop         |          1.4.7 | Relational database ↔ Hadoop transfer       |
 | PostgreSQL    |          16.14 | Relational database for testing             |
+| Sqoop         |          1.4.7 | Relational database ↔ Hadoop transfer       |
 | Elasticsearch |        8.17.10 | Search and analytics                        |
 | Logstash      |        8.17.10 | Data ingestion and processing               |
 | Kibana        |        8.17.10 | Visualization                               |
 | Kafka         |          3.9.1 | Distributed event streaming                 |
+
+> **Kafka version note:** `3.9.1` is the Kafka version. The `2.13` in the installation directory `kafka_2.13-3.9.1` refers to the Scala binary version, not the Kafka version.
 
 ---
 
@@ -91,10 +97,10 @@ The recommended installation order is:
 ### Foundation
 
 1. [Prerequisites](docs/00-prerequisites.md)
-2. [Hadoop](docs/01-hadoop.md)
 
 ### Hadoop Ecosystem
 
+2. [Hadoop](docs/01-hadoop.md)
 3. [Hive](docs/02-hive.md)
 4. [Spark](docs/03-spark.md)
 5. [Flink](docs/04-flink.md)
@@ -103,28 +109,48 @@ The recommended installation order is:
 
 ### Relational Database and Data Transfer
 
-8. [PostgreSQL](docs/12-postgresql.md)
-9. [Sqoop](docs/07-sqoop.md)
+8. [Sqoop](docs/07-sqoop.md)
+
+> PostgreSQL is used as the relational database for the Sqoop exercises and does not have a separate guide in this repository.
 
 ### ELK Stack
 
-10. [Elasticsearch](docs/08-elasticsearch.md)
-11. [Logstash](docs/09-logstash.md)
-12. [Kibana](docs/10-kibana.md)
+9. [Elasticsearch](docs/08-elastic_search.md)
+10. [Logstash](docs/08-elastic_search.md)
+11. [Kibana](docs/08-elastic_search.md)
+
+The Elasticsearch, Logstash, and Kibana setup is documented together because they form the ELK stack.
 
 ### Streaming
 
-13. [Kafka](docs/11-kafka.md)
-
-### Troubleshooting
-
-14. [Troubleshooting](docs/13-troubleshooting.md)
+12. [Kafka](docs/09-kafka.md)
 
 ---
 
 ## Directory Layout
 
-The tools are installed under a common directory:
+The repository itself is organized as:
+
+```text
+bigdata-ubuntu-guide/
+├── README.md
+├── docs/
+│   ├── 00-prerequisites.md
+│   ├── 01-hadoop.md
+│   ├── 02-hive.md
+│   ├── 03-spark.md
+│   ├── 04-flink.md
+│   ├── 05-flume.md
+│   ├── 06-hbase.md
+│   ├── 07-sqoop.md
+│   ├── 08-elastic_search.md
+│   └── 09-kafka.md
+└── scripts/
+    ├── setup-directories.sh
+    └── verify-installations.sh
+```
+
+The tools themselves are installed under:
 
 ```text
 /mnt/vol_e/bigdata/
@@ -150,7 +176,7 @@ A typical installation looks like:
 └── postgresql/
 ```
 
-The actual directory names may differ slightly depending on the downloaded archive.
+The exact directory names may differ depending on the downloaded archive and installation method.
 
 ---
 
@@ -201,6 +227,8 @@ The resulting learning environment combines several technologies:
               └──────────────┘
 ```
 
+The components do not all need to run simultaneously. The diagram represents the technologies included in the learning environment and some of their possible relationships.
+
 ---
 
 ## Important Notes
@@ -213,15 +241,19 @@ Hadoop therefore runs in pseudo-distributed mode.
 
 This is useful for learning:
 
-- HDFS
-- YARN
-- MapReduce
-- Hive
-- Spark
-- HBase
-- Flink
-- Flume
-- Sqoop
+* HDFS
+* YARN
+* MapReduce
+* Hive
+* Spark
+* HBase
+* Flink
+* Flume
+* Sqoop
+* Kafka
+* Elasticsearch
+* Logstash
+* Kibana
 
 but does not represent a production cluster.
 
@@ -233,7 +265,7 @@ Different tools have different Java compatibility requirements.
 
 This guide therefore uses both Java 8 and Java 17.
 
-In particular:
+Some Hadoop ecosystem components are configured around Java 8:
 
 ```text
 Hadoop / Hive / HBase
@@ -242,7 +274,7 @@ Hadoop / Hive / HBase
       Java 8
 ```
 
-while newer tools such as Kafka and Elasticsearch can use Java 17 or a bundled JDK.
+Newer tools such as Kafka can use Java 17, while Elasticsearch 8.17.10 uses its bundled JDK by default.
 
 Always check the individual tool's guide before changing `JAVA_HOME`.
 
@@ -257,6 +289,51 @@ BIGDATA_HOME=/mnt/vol_e/bigdata
 ```
 
 Using a dedicated partition can prevent large Hadoop, Kafka, and Elasticsearch data directories from filling the Ubuntu root filesystem.
+
+---
+
+### Configuration paths
+
+Many commands in the guides use environment variables such as:
+
+```bash
+$HADOOP_HOME
+$HIVE_HOME
+$SPARK_HOME
+$FLINK_HOME
+$FLUME_HOME
+$HBASE_HOME
+$SQOOP_HOME
+$ELASTICSEARCH_HOME
+$LOGSTASH_HOME
+$KAFKA_HOME
+```
+
+These variables should point to the actual installation directories on the system.
+
+---
+
+## Scripts
+
+The repository includes helper scripts under `scripts/`.
+
+### Setup directories
+
+```bash
+./scripts/setup-directories.sh
+```
+
+This creates the directories required by the local Big Data environment.
+
+### Verify installations
+
+```bash
+./scripts/verify-installations.sh
+```
+
+This checks whether the main Big Data commands are available and reports their versions.
+
+These scripts are convenience tools; the individual installation guides remain the authoritative source for installing and configuring each component.
 
 ---
 
@@ -318,28 +395,28 @@ HQuorumPeer
 
 ## Troubleshooting
 
-Common issues encountered during the setup are documented in:
+Common issues encountered during the setup are documented throughout the individual guides.
 
-[docs/13-troubleshooting.md](docs/13-troubleshooting.md)
+Important topics include:
 
-The troubleshooting guide covers:
+* Java version conflicts
+* `JAVA_HOME` problems
+* Hadoop daemon startup failures
+* HDFS permissions
+* YARN configuration
+* Spark/YARN configuration
+* Flink/HDFS integration
+* HBase RegionServer issues
+* Sqoop JDBC problems
+* PostgreSQL authentication
+* Commons Lang dependency conflicts
+* Elasticsearch 8 mapping changes
+* Kibana Data Views
+* Kafka KRaft storage formatting
+* Port conflicts
+* Stale processes
 
-- Java version conflicts
-- `JAVA_HOME` problems
-- Hadoop daemon startup failures
-- HDFS permissions
-- YARN configuration
-- Spark/YARN configuration
-- Flink/HDFS integration
-- HBase RegionServer issues
-- Sqoop JDBC problems
-- PostgreSQL SCRAM authentication
-- Commons Lang dependency conflicts
-- Elasticsearch 8 mapping changes
-- Kibana Data Views
-- Kafka KRaft storage formatting
-- Port conflicts
-- stale processes
+When troubleshooting, check the relevant tool's guide first.
 
 ---
 
@@ -397,13 +474,27 @@ Then:
 status 'simple'
 ```
 
+### Check Kafka
+
+```bash
+kafka-topics.sh --list --bootstrap-server localhost:9092
+```
+
+### Check Elasticsearch
+
+```bash
+curl --cacert "$ELASTICSEARCH_HOME/config/certs/http_ca.crt" \
+-u elastic \
+https://localhost:9200
+```
+
 ---
 
 ## Contributing
 
-This repository is primarily a personal learning guide, but improvements are welcome.
+This repository is primarily a learning guide, but improvements are welcome.
 
-When adding a tool:
+When adding or modifying a tool:
 
 1. Document the exact version.
 2. Include the download command.
@@ -414,7 +505,7 @@ When adding a tool:
 7. Include verification commands.
 8. Include at least one functional test.
 9. Document common errors and their fixes.
-10. Never commit credentials or generated data.
+10. Never commit credentials, tokens, passwords, or generated data.
 
 ---
 
