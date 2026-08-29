@@ -67,5 +67,4 @@ else
     echo "jps not found"
 fi
 
-echo
 echo "Verification complete."
