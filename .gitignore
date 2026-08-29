@@ -1,0 +1,55 @@
+# Secrets and credentials
+.env
+*.env
+*.key
+*.pem
+*.p12
+*.jks
+
+# Runtime data
+data/
+logs/
+tmp/
+
+# Hadoop data
+hdfs/
+namenode/
+datanode/
+
+# Kafka data
+kafka-data/
+data/kafka/
+
+# Elasticsearch data
+elasticsearch-data/
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archives and downloaded installers
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.deb
+*.rpm
+
+# Build/output
+build/
+dist/
+target/
+
+# Generated files
+*.log
+*.pid
